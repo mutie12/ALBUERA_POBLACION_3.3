@@ -17,12 +17,12 @@ let dbConnected = false;
 
 // CORS configuration for production
 const corsOptions = {
-  origin: process.env.NODE_ENV === "production"
-    ? [
-        process.env.FRONTEND_URL,
-        /\.onrender\.com$/,
-      ]
-    : ["http://localhost:5173", "http://localhost:3000"],
+  origin: [
+    "https://albuera-poblacion-mary.vercel.app",
+    "http://localhost:5173",
+    "http://localhost:3000",
+    /\.onrender\.com$/,
+  ],
   credentials: true,
   optionsSuccessStatus: 200
 };
