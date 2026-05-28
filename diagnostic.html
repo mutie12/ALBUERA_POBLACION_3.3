@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Albuera EMS - API Diagnostic</title>
+    <style>
+        body { font-family: monospace; padding: 20px; background: #1a1a1a; color: #00ff00; }
+        .test { margin: 10px 0; padding: 10px; border: 1px solid #333; border-radius: 4px; }
+        .pass { background: #0a3d0a; border-color: #00ff00; }
+        .fail { background: #3d0a0a; border-color: #ff0000; color: #ff0000; }
+        .info { background: #0a0a3d; border-color: #00aaff; color: #00aaff; }
+        button { padding: 10px 20px; margin: 5px; cursor: pointer; background: #00aaff; border: none; color: white; border-radius: 4px; }
+        button:hover { background: #0088cc; }
+        pre { white-space: pre-wrap; word-wrap: break-word; background: #000; padding: 10px; border-radius: 4px; overflow-x: auto; }
+    </style>
+</head>
+<body>
+    <h1>Albuera EMS - API Diagnostic Tool</h1>
+    
+    <div class="test info">
+        <strong>Backend URL:</strong> http://localhost:3000
+        <br><strong>Frontend URL:</strong> http://localhost:5173
+    </div>
+
+    <button onclick="testBackend()">Test Backend Health</button>
+    <button onclick="testPublicReports()">Test Public Reports API</button>
+    <button onclick="testAuthLogin()">Test Admin Login</button>
+    <button onclick="testAuthReports()">Test Authenticated Reports</button>
+    <button onclick="runAllTests()">Run All Tests</button>
+
+    <div id="results"></div>
+
+    <script>
+        const resultsDiv = document.getElementById('results');
+        const API_BASE = 'http://localhost:3000/api';
+        let authToken = null;
+
+        function log(message, type = 'info') {
+            const div = document.createElement('div');
+            div.className = `test ${type}`;
+            div.innerHTML = message.replace(/\n/g, '<br>');
+            resultsDiv.prepend(div);
+            console.log(message);
+        }
+
+        function jsonStringify(obj) {
+            try {
+                return JSON.stringify(obj, null, 2);
+            } catch (e) {
+                return String(obj);
+            }
+        }
+
+        async function testBackend() {
+            log('Testing backend health...', 'info');
+            try {
+                const res = await fetch('http://localhost:3000/');
+                const text = await res.text();
+                log(`✓ Backend responded: HTTP ${res.status}\nResponse: ${text}`, 'pass');
+            } catch (err) {
+                log(`✗ Backend not accessible: ${err.message}`, 'fail');
+            }
+        }
+
+        async function testPublicReports() {
+            log('Testing GET /api/reports/public...', 'info');
+            try {
+                const res = await fetch('http://localhost:3000/api/reports/public');
+                const data = await res.json();
+                log(`✓ Public reports: HTTP ${res.status}\nCount: ${Array.isArray(data) ? data.length : 'N/A'}\nData: ${jsonStringify(data).substring(0, 500)}`, 'pass');
+            } catch (err) {
+                log(`✗ Public reports failed: ${err.message}`, 'fail');
+            }
+        }
+
+        async function testAuthLogin() {
+            log('Testing POST /api/auth/login (admin)...', 'info');
+            try {
+                const res = await fetch('http://localhost:3000/api/auth/login', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ username: 'admin', password: 'admin123' })
+                });
+                const data = await res.json();
+                if (res.ok) {
+                    authToken = data.token;
+                    log(`✓ Login successful!\nToken: ${authToken.substring(0, 30)}...\nRole: ${data.role}\nUserID: ${data.userId}`, 'pass');
+                } else {
+                    log(`✗ Login failed: HTTP ${res.status}\n${jsonStringify(data)}`, 'fail');
+                }
+            } catch (err) {
+                log(`✗ Login error: ${err.message}`, 'fail');
+            }
+        }
+
+        async function testAuthReports() {
+            if (!authToken) {
+                log('⚠ No auth token. Please login first.', 'info');
+                return;
+            }
+            log('Testing GET /api/reports (authenticated)...', 'info');
+            try {
+                const res = await fetch('http://localhost:3000/api/reports', {
+                    headers: { 'Authorization': `Bearer ${authToken}` }
+                });
+                const data = await res.json();
+                if (res.ok) {
+                    log(`✓ Authenticated reports: HTTP ${res.status}\nCount: ${Array.isArray(data) ? data.length : 'N/A'}\nData: ${jsonStringify(data).substring(0, 500)}`, 'pass');
+                } else {
+                    log(`✗ Authenticated request failed: HTTP ${res.status}\n${jsonStringify(data)}`, 'fail');
+                }
+            } catch (err) {
+                log(`✗ Authenticated request error: ${err.message}`, 'fail');
+            }
+        }
+
+        async function runAllTests() {
+            resultsDiv.innerHTML = '';
+            await testBackend();
+            await new Promise(r => setTimeout(r, 1000));
+            await testPublicReports();
+            await new Promise(r => setTimeout(r, 1000));
+            await testAuthLogin();
+            await new Promise(r => setTimeout(r, 1000));
+            await testAuthReports();
+        }
+
+        // Auto-run on load
+        window.onload = () => {
+            log('Diagnostic tool loaded. Click buttons to test.', 'info');
+            // Auto-run tests
+            setTimeout(runAllTests, 500);
+        };
+    </script>
+</body>
+</html>

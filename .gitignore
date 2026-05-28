@@ -1,0 +1,60 @@
+# =========================
+# DEPENDENCIES
+# =========================
+node_modules/
+**/node_modules/
+
+# =========================
+# ENV FILES (CRITICAL)
+# =========================
+.env
+.env.local
+.env.development
+.env.test
+.env.production
+
+# =========================
+# LOGS
+# =========================
+logs
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+lerna-debug.log*
+
+# =========================
+# BUILD OUTPUT
+# =========================
+dist
+dist-ssr
+build
+frontend/dist
+backend/dist
+
+# =========================
+# SYSTEM FILES
+# =========================
+.DS_Store
+Thumbs.db
+
+# =========================
+# EDITORS
+# =========================
+.vscode/*
+!.vscode/extensions.json
+.idea
+
+# =========================
+# BACKUP / LOCAL FILES
+# =========================
+*.local
+*.bak
+*.tmp
+
+# =========================
+# DATABASE FILES (if ever used locally)
+# =========================
+*.sqlite
+*.db

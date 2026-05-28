@@ -1,0 +1,397 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ERD - Albuera-Poblacion EMS</title>
+  <script src="https://cdn.jsdelivr.net/npm/mermaid/dist/mermaid.min.js"></script>
+  <style>
+body {
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  background: linear-gradient(135deg, #1e3a5f 0%, #0d1f33 100%);
+  color: #000000;
+  margin: 0;
+  padding: 20px;
+  min-height: 100vh;
+  font-weight: bold;
+}
+    .container {
+      max-width: 1200px;
+      margin: 0 auto;
+    }
+    header {
+      text-align: center;
+      margin-bottom: 30px;
+      padding: 20px;
+      background: rgba(255,255,255,0.05);
+      border-radius: 12px;
+      backdrop-filter: blur(10px);
+    }
+    h1 {
+      margin: 0 0 10px 0;
+      font-size: 2.2rem;
+      color: #4fc3f7;
+    }
+    .subtitle {
+      color: #90a4ae;
+      font-size: 1rem;
+    }
+    .controls {
+      display: flex;
+      gap: 10px;
+      justify-content: center;
+      margin-bottom: 20px;
+      flex-wrap: wrap;
+    }
+    button {
+      background: #4fc3f7;
+      color: #0d1f33;
+      border: none;
+      padding: 10px 20px;
+      border-radius: 6px;
+      cursor: pointer;
+      font-weight: 600;
+      font-size: 14px;
+      transition: all 0.2s;
+    }
+    button:hover {
+      background: #81d4fa;
+      transform: translateY(-1px);
+    }
+.diagram-container {
+  background: white;
+  border-radius: 12px;
+  padding: 30px;
+  box-shadow: 0 10px 40px rgba(0,0,0,0.3);
+  overflow: auto;
+  min-height: 600px;
+  color: #000000;
+  font-weight: bold;
+}
+    #erd {
+      display: flex;
+      justify-content: center;
+    }
+    .legend {
+      margin-top: 30px;
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+      gap: 15px;
+    }
+    .legend-item {
+      background: rgba(255,255,255,0.05);
+      padding: 15px;
+      border-radius: 8px;
+      border-left: 4px solid #4fc3f7;
+    }
+    .legend-item h4 {
+      margin: 0 0 8px 0;
+      color: #4fc3f7;
+      font-size: 0.95rem;
+    }
+    .legend-item p {
+      margin: 0;
+      color: #b0bec5;
+      font-size: 0.85rem;
+      line-height: 1.5;
+    }
+    .legend-item code {
+      background: rgba(79, 195, 247, 0.1);
+      padding: 2px 6px;
+      border-radius: 4px;
+      font-family: monospace;
+      font-size: 0.8rem;
+    }
+    footer {
+      text-align: center;
+      margin-top: 30px;
+      color: #607d8b;
+      font-size: 0.85rem;
+    }
+    .hidden {
+      display: none;
+    }
+    .error {
+      background: #ef4444;
+      color: white;
+      padding: 20px;
+      border-radius: 8px;
+      text-align: center;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <header>
+      <h1>Database ERD</h1>
+      <div class="subtitle">Albuera-Poblacion Emergency Management System | MongoDB + Mongoose</div>
+    </header>
+
+    <div class="controls">
+      <button onclick="downloadSVG()">Download SVG</button>
+      <button onclick="downloadPNG()">Download PNG</button>
+      <button onclick="changeTheme('default')">Light Theme</button>
+      <button onclick="changeTheme('dark')">Dark Theme</button>
+    </div>
+
+    <div class="diagram-container">
+      <div id="erd">
+        <pre class="mermaid">
+erDiagram
+     %% ========== ENTITY DEFINITIONS ==========
+
+     User {
+         string _id PK
+         string name
+         string username
+         string password
+         string email
+         string phone
+         string barangay
+         string barangayCode
+         bool isBarangayVerified
+         string department
+         string badgeNumber
+         string vehicleNumber
+         string role "resident|admin|respondent"
+         string status "pending|approved|rejected"
+         string verificationCode
+         date createdAt
+     }
+
+     Report {
+         string _id PK
+         ObjectId reporterId FK
+         string reporterName
+         string location
+         string emergencyType
+         string description
+         string image
+         string resolution
+         string status "Pending|Responding|Resolved"
+         ObjectId assignedTo.respondentId FK
+         string assignedTo.respondentName
+         date assignedTo.assignedAt
+         date date
+     }
+
+     Notification {
+         string _id PK
+         ObjectId recipientId FK
+         string recipientName
+         ObjectId senderId FK
+         string senderName
+         string type "assignment|update|resolved|system|broadcast|emergency|resident-message|resident-emergency"
+         string title
+         string message
+         ObjectId reportId FK
+         string emergencyType
+         string location
+         string image
+         string status "unread|read"
+         date createdAt
+     }
+
+     News {
+         string _id PK
+         string title
+         string content
+         string category "announcement|safety-tip|update|alert"
+         string priority "low|normal|high"
+         ObjectId author.id FK
+         string author.name
+         string author.department
+         bool isActive
+         string hazardType
+         string location
+         string details
+         bool smsSent
+         date createdAt
+         date updatedAt
+     }
+
+     %% ========== RELATIONSHIPS ==========
+
+     User ||--o{ Notification : "recipient"
+     User ||--o{ Notification : "sender"
+     User ||--o{ Report : "reporter"
+     User ||--o{ Report : "assignedTo"
+     User ||--o{ News : "author"
+
+     Report ||--o{ Notification : "related"
+        </pre>
+      </div>
+    </div>
+
+    <div class="legend">
+     <div class="legend-item">
+       <h4>👤 User (Single Collection)</h4>
+       <p>All users (Admins, Respondents, Residents) stored in one <code>users</code> collection. Differentiated by <code>role</code> field (discriminator). Contains common fields plus role-specific fields that may be null for certain roles.</p>
+     </div>
+     <div class="legend-item">
+       <h4>👑 Admin Role</h4>
+       <p>Users with <code>role: "admin"</code>. Have elevated privileges for system management, user administration, and emergency oversight.</p>
+     </div>
+     <div class="legend-item">
+       <h4>🚒 Respondent Role</h4>
+       <p>Users with <code>role: "respondent"</code>. Emergency responders assigned to incidents. May have barangay, station, badge number, and vehicle information.</p>
+     </div>
+     <div class="legend-item">
+       <h4>🏠 Resident Role</h4>
+       <p>Users with <code>role: "resident"</code>. Citizens who can file emergency reports. Requires barangay verification before submitting reports.</p>
+     </div>
+     <div class="legend-item">
+       <h4>🟣 Report</h4>
+       <p>Emergency incidents filed by Residents. Contains location, type, description, image, resolution, status lifecycle. Assigned to Respondents by Admins.</p>
+     </div>
+     <div class="legend-item">
+       <h4>🟠 Notification</h4>
+       <p>Real-time alerts sent to Users (in-app + SMS via Twilio). Types: assignment, update, resolved, emergency, broadcast, etc.</p>
+     </div>
+     <div class="legend-item">
+       <h4>⚫ News</h4>
+       <p>Public announcements, safety tips, and alerts broadcast to all users. Managed by Admins. Supports categories and priority levels.</p>
+     </div>
+     <div class="legend-item">
+       <h4>👑 Admin Role</h4>
+       <p>Users with <code>role: "admin"</code>. Have elevated privileges for system management, user administration, and emergency oversight.</p>
+     </div>
+     <div class="legend-item">
+       <h4>🚒 Respondent Role</h4>
+       <p>Users with <code>role: "respondent"</code>. Emergency responders assigned to incidents. May have barangay, station, badge number, and vehicle information.</p>
+     </div>
+     <div class="legend-item">
+       <h4>🏠 Resident Role</h4>
+       <p>Users with <code>role: "resident"</code>. Citizens who can file emergency reports. Requires barangay verification before submitting reports.</p>
+     </div>
+     <div class="legend-item">
+       <h4>🟣 Report</h4>
+       <p>Emergency incidents filed by Residents. Contains location, type, description, image, resolution, status lifecycle. Assigned to Respondents by Admins.</p>
+     </div>
+     <div class="legend-item">
+       <h4>🟠 Notification</h4>
+       <p>Real-time alerts sent to Users (in-app + SMS via Twilio). Types: assignment, update, resolved, emergency, broadcast, etc.</p>
+     </div>
+     <div class="legend-item">
+       <h4>⚫ News</h4>
+       <p>Public announcements, safety tips, and alerts broadcast to all users. Managed by Admins. Supports categories and priority levels.</p>
+     </div>
+     <div class="legend-item">
+       <h4>👑 Admin Role</h4>
+       <p>Users with <code>role: "admin"</code>. Have elevated privileges for system management, user administration, and emergency oversight.</p>
+     </div>
+     <div class="legend-item">
+       <h4>🚒 Respondent Role</h4>
+       <p>Users with <code>role: "respondent"</code>. Emergency responders assigned to incidents. May have barangay, station, badge number, and vehicle information.</p>
+     </div>
+     <div class="legend-item">
+       <h4>🏠 Resident Role</h4>
+       <p>Users with <code>role: "resident"</code>. Citizens who can file emergency reports. Requires barangay verification before submitting reports.</p>
+     </div>
+      <div class="legend-item">
+        <h4>🟣 Report</h4>
+        <p>Emergency incidents filed by Residents. Contains location, type, description, status lifecycle. Assigned to Respondents by Admins.</p>
+      </div>
+      <div class="legend-item">
+        <h4>🟠 Notification</h4>
+        <p>Real-time alerts sent to Users (in-app + SMS via Twilio). Types: assignment, update, resolved, emergency, broadcast, etc.</p>
+      </div>
+      <div class="legend-item">
+        <h4>⚫ News</h4>
+        <p>Public announcements, safety tips, and alerts broadcast to all users. Managed by Admins. Supports categories and priority levels.</p>
+      </div>
+    </div>
+
+    <footer>
+      Generated from Mongoose schemas in <code>backend/models/</code>
+    </footer>
+  </div>
+
+<script>
+  mermaid.initialize({
+    startOnLoad: true,
+    theme: 'default',
+    er: {
+      diagramPadding: 20,
+      layoutDirection: 'TB',
+      minEntityWidth: 100,
+      minEntityHeight: 50,
+      entityPadding: 15,
+      stroke: '#000000',
+      strokeWidth: 2,
+      fontSize: 14,
+      fontWeight: 'bold'
+    },
+    securityLevel: 'loose'
+  });
+
+    function downloadSVG() {
+      const svgElement = document.querySelector('#erd svg');
+      if (!svgElement) {
+        alert('Diagram not yet rendered. Please wait.');
+        return;
+      }
+      const serializer = new XMLSerializer();
+      const source = serializer.serializeToString(svgElement);
+      const blob = new Blob([source], { type: 'image/svg+xml;charset=utf-8' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = 'erd-diagram.svg';
+      a.click();
+      URL.revokeObjectURL(url);
+    }
+
+    function downloadPNG() {
+      const svgElement = document.querySelector('#erd svg');
+      if (!svgElement) {
+        alert('Diagram not yet rendered. Please wait.');
+        return;
+      }
+      const canvas = document.createElement('canvas');
+      const ctx = canvas.getContext('2d');
+      const serializer = new XMLSerializer();
+      const svgString = serializer.serializeToString(svgElement);
+      const img = new Image();
+      const svgBlob = new Blob([svgString], { type: 'image/svg+xml;charset=utf-8' });
+      const url = URL.createObjectURL(svgBlob);
+
+      img.onload = function() {
+        canvas.width = img.width * 2;
+        canvas.height = img.height * 2;
+        ctx.scale(2, 2);
+        ctx.fillStyle = 'white';
+        ctx.fillRect(0, 0, canvas.width, canvas.height);
+        ctx.drawImage(img, 0, 0);
+
+        const pngUrl = canvas.toDataURL('image/png');
+        const a = document.createElement('a');
+        a.href = pngUrl;
+        a.download = 'erd-diagram.png';
+        a.click();
+        URL.revokeObjectURL(url);
+      };
+      img.onerror = function(e) {
+        console.error('Image load error:', e);
+        alert('Failed to generate PNG. Try SVG instead.');
+      };
+      img.src = url;
+    }
+
+    function changeTheme(theme) {
+      mermaid.initialize({
+        theme: theme,
+        er: { diagramPadding: 20, layoutDirection: 'TB' }
+      });
+      location.reload();
+    }
+
+    // Error handling for mermaid
+    window.addEventListener('error', function(e) {
+      if (e.message && e.message.includes('mermaid')) {
+        console.error('Mermaid error:', e.error);
+      }
+    });
+  </script>
+</body>
+</html>
