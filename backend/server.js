@@ -1,5 +1,5 @@
 if (process.env.NODE_ENV !== "production") {
-  require("dotenv").config();
+  try { require("dotenv").config(); } catch { /* dotenv not installed */ }
 }
 
 const express = require("express");
@@ -89,57 +89,6 @@ if (MONGO_URI) {
     .catch((err) => { console.error("MongoDB Connection Error:", err.message); dbConnected = false; });
 }
 
-app.use((err, req, res, next) => {
-  console.error(err.stack);
-  res.status(500).json({ message: "Internal server error" });
-});
-
-// Fallback news route (must be before regular routes)
-app.get("/api/news", async (req, res, next) => {
-  if (!dbConnected) {
-    return res.json(sampleNews);
-  }
-  next();
-});
-
-// Routes
-app.use("/api/auth", authRoutes);
-app.use("/api/reports", reportRoutes);
-app.use("/api/notifications", notificationRoutes);
-app.use("/api/news", newsRoutes);
-
-// Test route
-app.get("/", (req, res) => {
-  res.send("Albuera EMS Backend is running");
-});
-
-// Start server FIRST
-const PORT = process.env.PORT || 3000;
-app.listen(PORT, () => {
-  console.log(`Server running on port ${PORT}`);
-});
-
-// THEN connect to MongoDB (non-blocking)
-const MONGO_URI = process.env.MONGO_URI
-  || "mongodb://AlbueraESDB:MonkeyD.Luffy12@ac-yzx5rpj-shard-00-00.4kmpz5z.mongodb.net:27017,ac-yzx5rpj-shard-00-01.4kmpz5z.mongodb.net:27017,ac-yzx5rpj-shard-00-02.4kmpz5z.mongodb.net:27017/ALBUERA_POBLACION_3?ssl=true&replicaSet=atlas-m0c5ou-shard-0&authSource=admin&appName=AlbueraESDB";
-
-mongoose.connect(MONGO_URI, {
-  serverSelectionTimeoutMS: 10000,
-  socketTimeoutMS: 45000,
-  connectTimeoutMS: 10000,
-  maxPoolSize: 10,
-})
-.then(() => {
-  console.log("MongoDB Connected");
-  dbConnected = true;
-})
-.catch(err => {
-  console.error("MongoDB Connection Error:", err.message);
-  console.warn("Running in fallback mode - database unavailable");
-  dbConnected = false;
-});
-
-// Global error handler
 app.use((err, req, res, next) => {
   console.error(err.stack);
   res.status(500).json({ message: "Internal server error" });
