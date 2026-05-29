@@ -28,8 +28,11 @@ function Home() {
       const res = await api.get("/reports/public");
       setReports(Array.isArray(res.data) ? res.data : []);
     } catch (err) {
-      const msg = err.response?.data?.message || err.response?.data?.error || err.message || "Failed to load reports";
-      setError(msg);
+      const data = err.response?.data;
+      const msg = typeof data === "string"
+        ? `Server error (${err.response?.status || "network"})`
+        : data?.message || data?.error || err.message || "Failed to load reports";
+      setError(String(msg));
       setReports([]);
     } finally {
       setReportsLoading(false);
