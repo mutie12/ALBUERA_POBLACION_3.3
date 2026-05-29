@@ -94,7 +94,7 @@ export function Icon({ name, size = 20, color, className = "", style = {} }) {
   const IconComponent = iconMap[name];
   if (!IconComponent) {
     console.warn(`Icon "${name}" not found`);
-    return null;
+    return <span style={{ display: 'inline-block', width: size, height: size, ...style }} />;
   }
   return (
     <IconComponent 
@@ -123,13 +123,13 @@ export const getEmergencyIconAsComponent = (type, size = 20, color) => {
     "Typhoon": { name: "cloud", color: "#06b6d4" },
     "Landslide": { name: "activity", color: "#a16207" },
     "Infrastructure Damage": { name: "wrench", color: "#78716c" },
-    "Power Outage": { name: "bolt", color: "#f59e0b" },
-    "Other": { name: "alert", color: "#6b7280" },
+    "Power Outage": { name: "zap", color: "#f59e0b" },
+    "Other": { name: "alertTriangle", color: "#6b7280" },
     "Emergency": { name: "siren", color: "#ef4444" },
   };
   const config = map[type] || map["Other"];
   const IconComp = iconMap[config.name];
-  if (!IconComp) return null;
+  if (!IconComp) return <span style={{ display: 'inline-block', width: size, height: size }} />;
   return <IconComp size={size} color={color || config.color} />;
 };
 
@@ -142,7 +142,7 @@ export const getStatusIconComponent = (status, size = 18, color) => {
   };
   const config = map[status] || { name: "info", color: color || "#6b7280" };
   const IconComp = iconMap[config.name];
-  if (!IconComp) return null;
+  if (!IconComp) return <span style={{ display: 'inline-block', width: size, height: size }} />;
   return <IconComp size={size} color={config.color} />;
 };
 
